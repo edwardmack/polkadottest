@@ -2,19 +2,12 @@
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 
 async function main() {
-// Construct
-const wsProvider = new WsProvider('ws://127.0.0.1:8546');
-//const wsProvider = new WsProvider('ws://127.0.0.1:9944');
-//const wsProvider = new WsProvider('wss://rpc.polkadot.io');
-const api = await ApiPromise.create({ provider: wsProvider });
+	// Construct
+	const wsProvider = new WsProvider('ws://127.0.0.1:8546');
+	const api = await ApiPromise.create({ provider: wsProvider });
 
-//console.log(api.genesisHash.toHex()); // works
-//console.log(api.consts.babe.epochDuration.toNumber());
-const ADDR = '5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE';
 
 	const now = await api.query.timestamp.now(); // works
-//	const { nonce, data: balance } = await api.query.system.account(ADDR);
-//	console.log(`${now}: balance of ${balance.free} and a nonce of ${nonce}`);
 
 	console.log(`timestamp now: ${now}`);
 
@@ -30,32 +23,45 @@ const ADDR = '5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE';
 
 	console.log(`current block: ${block}`);
 
+	getblock(blockHash, api);
 
 	const lastHeader = await api.rpc.chain.getHeader();
 	console.log(`lastHeader ${lastHeader}`);
-let count = 0;
+let countB = 0;
 
 	const unsubHeads = await api.rpc.chain.subscribeNewHeads((lastHeader) => {
-		console.log(`${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`);
-		if(++count === 10) {
+		console.log(`c ${countB} ${chain}: last block #${lastHeader.number} has hash ${lastHeader.hash}`);
+		console.log(`raw lastHeader: ${lastHeader}`);
+		if(++countB === 3) {
 			unsubHeads();
 		}
+		getBlockHash(lastHeader.number, api);
+		//getblock(lastHeader.hash, api);
 	});
-	count = 0;
+	
+	countF = 0;
 	const unsubFins = await api.rpc.chain.subscribeFinalizedHeads((lastFin) => {
-		console.log(`${chain}: last fin block #${lastFin.number} has hash ${lastFin.hash}`);
-		if(++count === 10) {
+		console.log(`c ${countF} ${chain}: last fin block #${lastFin.number} has hash ${lastFin.hash}`);
+		if(++countF === 3) {
 			unsubFins();
 		}
-		getblock(lastFin.hash, api);
+		//getBlockHash(lastFin.hash, api);
 	});
+	console.log('all done');
 
 }
 
+async function getBlockHash(number, api) {
+	console.log(`getBlockHash number: ${number}`);
+	const hash = await api.rpc.chain.getBlockHash(number);
+	console.log(`block hash for ${number}: ${hash}`);
+	getblock(hash, api);
+}
 
 async function getblock(hash, api) {
+	console.log(`getBlock hash: ${hash}`);
 
 		const block = await api.rpc.chain.getBlock(hash);
-		console.log(`block ${block.header}`);
+		console.log(`block ${block}`);
 }
 main();

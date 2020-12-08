@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@polkadot/api": "1.34.1"
+    "@polkadot/api": "^2.10.1",
+    "prompt-sync": "^4.2.0"
   }
 }
